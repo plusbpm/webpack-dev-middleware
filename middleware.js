@@ -2,6 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
+var nodeFileSystem = require("fs");
 var MemoryFileSystem = require("memory-fs");
 var mime = require("mime");
 
@@ -26,9 +27,14 @@ module.exports = function(compiler, options) {
 		}
 	}
 
-	// store our files in memory
+	// store our files by compiler or in memory
 	var files = {};
-	var fs = compiler.outputFileSystem = new MemoryFileSystem();
+
+	if(options.useNodeFileSystem) {
+		var fs = nodeFileSystem;
+	} else {
+		var fs = compiler.outputFileSystem = new MemoryFileSystem();
+	}
 
 	compiler.plugin("done", function(stats) {
 		// We are now on valid state
@@ -175,7 +181,7 @@ module.exports = function(compiler, options) {
 					res.setHeader(name, options.headers[name]);
 				}
 			}
-			res.send(content);
+			res.end(content);
 		}, req);
 	}
 
